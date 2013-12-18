@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Dean's D3 project</title>
+<style>
+
+    body {
+        font: 20px sans-serif;
+    }
+
+    .arc path {
+        stroke: #fff;
+    }
+
+</style>
+</head>
+<body>
+    <h1>US presidents by birth month</h1>
+<script src="d3js.js"></script>
+<script>
+
+    var width = 960,
+    height = 600,
+    //divide by more than 2 to make room for labels on outside arc
+    radius = Math.min(width, height) / 2.1;
+
+    var color = d3.scale.category20();
+
+    var arc = d3.svg.arc()
+        .outerRadius(radius - 10)
+        .innerRadius(0);
+
+    var pie = d3.layout.pie()
+        .sort(null)
+        .value(function(d) { return d.population; });
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    d3.csv("data.csv", function(error, data) {
+
+    data.forEach(function(d) {
+        d.population = +d.population;
+    });
+
+    var g = svg.selectAll(".arc")
+        .data(pie(data))
+        .enter().append("g")
+        .attr("class", "arc");
+
+    g.append("path")
+        .attr("d", arc)
+        .style("fill", function(d) { return color(d.data.age); });
+
+    // second arc for labels
+    var arc2 = d3.svg.arc()
+        .outerRadius(radius)
+        .innerRadius(radius + 10);
+
+    // label attached to second arc
+    g.append("text")
+        .attr("transform", function(d) { return "translate(" + arc2.centroid(d) + ")"; })
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text(function(d) { return d.data.age + " (" + d.data.population + ")"; });
+
+});
+
+</script>
+</body>
+</html>
